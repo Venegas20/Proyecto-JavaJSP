@@ -30,7 +30,7 @@
             <li><a href="entidades.jsp"><i class="fas fa-desktop"></i> Gestión de Entidad</a></li>
             <li><a href="#"><i class="fas fa-chart-line"></i> Gestión de Perfil</a></li>
                 <%}%>
-            <li><a href="#"><i class="fas fa-ticket"></i> Gestión de Tickets</a></li>
+            <li><a href="tickets.jsp"><i class="fas fa-ticket"></i> Gestión de Tickets</a></li>
         </ul>
 
         <h3>MANTENIMIENTO</h3>
