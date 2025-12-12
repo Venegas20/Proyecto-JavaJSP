@@ -15,15 +15,27 @@ private String clave;
 private String nusuario;
 private String email;
 private int pid;
+private String nombre_perfil;
 
-    public EUsuario(int id, String usuario, String clave, String nusuario, String email, int pid) {
+    public EUsuario(int id, String usuario, String clave, String nusuario, String email, int pid, String nombre_perfil) {
         this.id = id;
         this.usuario = usuario;
         this.clave = clave;
         this.nusuario = nusuario;
         this.email = email;
         this.pid = pid;
+        this.nombre_perfil = nombre_perfil;
     }
+
+    public String getNombre_perfil() {
+        return nombre_perfil;
+    }
+
+    public void setNombre_perfil(String nombre_perfil) {
+        this.nombre_perfil = nombre_perfil;
+    }
+
+  
 
     public EUsuario(String usuario, String clave, String nusuario, String email, int pid) {
         this.usuario = usuario;

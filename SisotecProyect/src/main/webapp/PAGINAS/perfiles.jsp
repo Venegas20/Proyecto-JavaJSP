@@ -7,119 +7,22 @@
 <!-- 🔗 IMPORTAMOS LA CONEXIÓN EXTERNA -->
 <%@ include file="../DBCONEXION/conexionDB.jsp"%>
 
-<%-- CÓDIGO PARA PROCESAR CRUD --%>
-<%
-    // Procesar las operaciones CRUD
-    if (request.getMethod().equals("POST")) {
-        String accion = request.getParameter("accion");
-        Connection conCrud = null;
-        PreparedStatement psCrud = null;
-        
-        try {
-            conCrud = cn;
-            
-            if (accion != null) {
-                switch (accion) {
-                    case "crear":
-                        // INSERTAR NUEVO PERFIL
-                        String nombrePerfil = request.getParameter("nombre_perfil");
-                        String estadoPerfil = request.getParameter("estado_perfil");
-                        
-                        String sqlInsert = "INSERT INTO perfil (Nombre_Perfil, Estado_Perfil) VALUES (?, ?)";
-                        psCrud = conCrud.prepareStatement(sqlInsert);
-                        psCrud.setString(1, nombrePerfil);
-                        psCrud.setInt(2, Integer.parseInt(estadoPerfil));
-                        psCrud.executeUpdate();
-                        
-                        session.setAttribute("mensaje", "Perfil creado exitosamente");
-                        session.setAttribute("tipoMensaje", "success");
-                        break;
-                        
-                    case "editar":
-                        // ACTUALIZAR PERFIL
-                        String idEditar = request.getParameter("idPerfil");
-                        String nombreEditar = request.getParameter("nombre_perfil");
-                        String estadoEditar = request.getParameter("estado_perfil");
-                        
-                        String sqlUpdate = "UPDATE perfil SET Nombre_Perfil = ?, Estado_Perfil = ? WHERE idPerfil = ?";
-                        psCrud = conCrud.prepareStatement(sqlUpdate);
-                        psCrud.setString(1, nombreEditar);
-                        psCrud.setInt(2, Integer.parseInt(estadoEditar));
-                        psCrud.setInt(3, Integer.parseInt(idEditar));
-                        psCrud.executeUpdate();
-                        
-                        session.setAttribute("mensaje", "Perfil actualizado exitosamente");
-                        session.setAttribute("tipoMensaje", "success");
-                        break;
-                        
-                    case "eliminar":
-                        // ELIMINAR PERFIL
-                        String idEliminar = request.getParameter("idEliminar");
-                        
-                        String sqlDelete = "DELETE FROM perfil WHERE idPerfil = ?";
-                        psCrud = conCrud.prepareStatement(sqlDelete);
-                        psCrud.setInt(1, Integer.parseInt(idEliminar));
-                        int filas = psCrud.executeUpdate();
-                        
-                        if (filas > 0) {
-                            session.setAttribute("mensaje", "Perfil eliminado exitosamente");
-                            session.setAttribute("tipoMensaje", "success");
-                        } else {
-                            session.setAttribute("mensaje", "No se pudo eliminar el perfil");
-                            session.setAttribute("tipoMensaje", "danger");
-                        }
-                        break;
-                }
-            }
-            
-            // Redirigir para evitar reenvío del formulario
-            response.sendRedirect("perfil.jsp");
-            return;
-            
-        } catch (Exception e) {
-            session.setAttribute("mensaje", "Error: " + e.getMessage());
-            session.setAttribute("tipoMensaje", "danger");
-            response.sendRedirect("perfil.jsp");
-            return;
-        } finally {
-            try {
-                if (psCrud != null) psCrud.close();
-                if (conCrud != null) conCrud.close();
-            } catch (Exception ex) {}
-        }
-    }
-%>
 
-<%
-    EUsuario user = (EUsuario) session.getAttribute("usuario");
+<%    EUsuario user = (EUsuario) session.getAttribute("usuario");
     List<ResultSet> listaPerfiles = new ArrayList<>();
+    Connection con = cn;
+    PreparedStatement ps = null;
+    ResultSet rs = null;
     if (user == null) {
         response.sendRedirect("../LOGIN/login.html");
-    } else {
-        Connection con = cn;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        if (con == null) {
-            response.sendRedirect("../LOGIN/errorDb.jsp");
-        } else {
-            try {
-                ps = con.prepareStatement("SELECT * FROM perfil ORDER BY idPerfil");
-                rs = ps.executeQuery();
-                
-                while (rs.next()) {
-                    listaPerfiles.add(rs);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                try {
-                    if (rs != null) rs.close();
-                    if (ps != null) ps.close();
-                    if (con != null) con.close();
-                } catch (Exception ex) {}
-            }
-        }
+        return;
     }
+
+    if (con == null) {
+        response.sendRedirect("../LOGIN/errorDb.jsp");
+        return;
+    }
+
 %>
 
 <!DOCTYPE html>
@@ -251,7 +154,7 @@
             .search-box {
                 max-width: 300px;
             }
-            
+
             /* Estilo para mensajes de alerta */
             .alert {
                 border-radius: 8px;
@@ -270,7 +173,7 @@
         <main class="main-content">
 
             <div class="col">
-                
+
                 <!-- MOSTRAR MENSAJES DE CONFIRMACIÓN -->
                 <%
                     String mensaje = (String) session.getAttribute("mensaje");
@@ -279,8 +182,8 @@
                 %>
                 <div class="row mb-3">
                     <div class="col-12">
-                        <div class="alert alert-<%= tipoMensaje != null ? tipoMensaje : "success" %> alert-dismissible fade show" role="alert">
-                            <i class="bi bi-check-circle me-2"></i><%= mensaje %>
+                        <div class="alert alert-<%= tipoMensaje != null ? tipoMensaje : "success"%> alert-dismissible fade show" role="alert">
+                            <i class="bi bi-check-circle me-2"></i><%= mensaje%>
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
                     </div>
@@ -323,45 +226,76 @@
                             </thead>
                             <tbody>
                                 <%
-                                    if (listaPerfiles.isEmpty()) {
+                                    boolean tieneRegistros = false;
+                                    try {
+                                        con = cn;
+                                        if (con == null) {
+                                            response.sendRedirect("../LOGIN/errorDb.jsp");
+                                        } else {
+                                            ps = con.prepareStatement("SELECT * FROM perfil ORDER BY idPerfil");
+                                            rs = ps.executeQuery();
+
+                                            // Verificar si hay registros
+                                            if (!rs.isBeforeFirst()) {
+                                                // No hay registros
                                 %>
+
                                 <tr>
                                     <td colspan="4" class="text-center py-4">
                                         <i class="fas fa-info-circle me-2"></i>No hay perfiles registrados
                                     </td>
                                 </tr>
                                 <%
-                                    } else {
-                                        for (ResultSet perfil : listaPerfiles) {
-                                            int id = perfil.getInt("idPerfil");
-                                            String nombre = perfil.getString("Nombre_Perfil");
-                                            int estado = perfil.getInt("Estado_Perfil");
-                                            String estadoTexto = (estado == 1) ? "Activo" : "Inactivo";
-                                            String estadoClase = (estado == 1) ? "status-active" : "status-inactive";
-                                            String iconoEstado = (estado == 1) ? "fa-check-circle" : "fa-times-circle";
+                                } else {
+                                    // Procesar cada registro
+                                    while (rs.next()) {
+                                        tieneRegistros = true;
+                                        int id = rs.getInt("idPerfil");
+                                        String nombre = rs.getString("Nombre_Perfil");
+                                        int estado = rs.getInt("Estado_Perfil");
+                                        String estadoTexto = (estado == 1) ? "Activo" : "Inactivo";
+                                        String estadoClase = (estado == 1) ? "status-active" : "status-inactive";
+                                        String iconoEstado = (estado == 1) ? "fa-check-circle" : "fa-times-circle";
                                 %>
                                 <!-- Fila de perfil -->
-                                <tr id="fila-<%= id %>">
-                                    <td><span class="perfil-id"><%= id %></span></td>
-                                    <td><%= nombre %></td>
+                                <tr id="fila-<%= id%>">
+                                    <td><span class="perfil-id"><%= id%></span></td>
+                                    <td><%= nombre%></td>
                                     <td>
-                                        <span class="badge-status <%= estadoClase %>">
-                                            <i class="fas <%= iconoEstado %> me-1"></i> <%= estadoTexto %>
+                                        <span class="badge-status <%= estadoClase%>">
+                                            <i class="fas <%= iconoEstado%> me-1"></i> <%= estadoTexto%>
                                         </span>
                                     </td>
                                     <td>
-                                        <button class="btn btn-view btn-action" onclick="verPerfil(<%= id %>, '<%= nombre %>', <%= estado %>)">
+                                        <button class="btn btn-view btn-action" onclick="verPerfil(<%= id%>, '<%= nombre%>', <%= estado%>)">
                                             <i class="fas fa-eye"></i> Ver
                                         </button>
-                                        <button class="btn btn-edit btn-action" onclick="editarPerfil(<%= id %>, '<%= nombre %>', <%= estado %>)" data-bs-toggle="modal" data-bs-target="#editModal">
+                                        <button class="btn btn-edit btn-action" onclick="editarPerfil(<%= id%>, '<%= nombre%>', <%= estado%>)" data-bs-toggle="modal" data-bs-target="#editModal">
                                             <i class="fas fa-edit"></i> Editar
                                         </button>
-                                        <button class="btn btn-delete btn-action" onclick="eliminarPerfil(<%= id %>, '<%= nombre %>')" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                        <button class="btn btn-delete btn-action" onclick="eliminarPerfil(<%= id%>, '<%= nombre%>')" data-bs-toggle="modal" data-bs-target="#deleteModal">
                                             <i class="fas fa-trash"></i> Eliminar
                                         </button>
                                     </td>
                                 </tr>
                                 <%
+                                                }
+                                            }
+                                        }
+                                    } catch (Exception e) {
+                                        out.print("<tr><td colspan='4' class='text-center text-danger py-4'>Error al cargar los perfiles: " + e.getMessage() + "</td></tr>");
+                                    } finally {
+                                        try {
+                                            if (rs != null) {
+                                                rs.close();
+                                            }
+                                            if (ps != null) {
+                                                ps.close();
+                                            }
+                                            if (con != null) {
+                                                con.close();
+                                            }
+                                        } catch (Exception ex) {
                                         }
                                     }
                                 %>
@@ -417,7 +351,7 @@
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                                 aria-label="Close"></button>
                     </div>
-                    <form id="formCrear" action="perfiles.jsp" method="POST">
+                    <form id="formCrear" action="procesar/procesar-perfiles.jsp" method="POST">
                         <div class="modal-body">
                             <input type="hidden" name="accion" value="crear">
                             <div class="mb-3">
@@ -461,7 +395,7 @@
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                                 aria-label="Close"></button>
                     </div>
-                    <form id="formEditar" action="perfiles.jsp" method="POST">
+                    <form id="formEditar" action="procesar/procesar-perfiles.jsp" method="POST">
                         <div class="modal-body">
                             <input type="hidden" name="accion" value="editar">
                             <input type="hidden" id="editId" name="idPerfil" value="">
@@ -511,7 +445,7 @@
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                                 aria-label="Close"></button>
                     </div>
-                    <form id="formEliminar" action="perfiles.jsp" method="POST">
+                    <form id="formEliminar" action="procesar/procesar-perfiles.jsp" method="POST">
                         <div class="modal-body">
                             <input type="hidden" name="accion" value="eliminar">
                             <input type="hidden" id="deleteId" name="idEliminar" value="">
@@ -541,172 +475,172 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 
         <script>
-            // Variables globales
-            let perfilActualId = 0;
-            let perfilActualNombre = '';
-            
-            // Función para filtrar perfiles en la tabla
-            function filtrarPerfiles() {
-                const input = document.getElementById('buscarPerfil');
-                const filter = input.value.toUpperCase();
-                const table = document.getElementById('tablaPerfiles');
-                const tr = table.getElementsByTagName('tr');
-                
-                for (let i = 1; i < tr.length; i++) {
-                    const tdNombre = tr[i].getElementsByTagName('td')[1];
-                    if (tdNombre) {
-                        const txtValue = tdNombre.textContent || tdNombre.innerText;
-                        if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                            tr[i].style.display = "";
-                        } else {
-                            tr[i].style.display = "none";
-                        }
-                    }
-                }
-            }
-            
-            // Función para mostrar detalles del perfil
-            function verPerfil(id, nombre, estado) {
-                perfilActualId = id;
-                perfilActualNombre = nombre;
-                
-                document.getElementById('viewId').textContent = id;
-                document.getElementById('viewNombre').textContent = nombre;
-                
-                const estadoTexto = (estado == 1) ? 'Activo' : 'Inactivo';
-                const estadoClase = (estado == 1) ? 'status-active' : 'status-inactive';
-                const icono = (estado == 1) ? 'fa-check-circle' : 'fa-times-circle';
-                
-                document.getElementById('viewEstado').innerHTML = `
+                                            // Variables globales
+                                            let perfilActualId = 0;
+                                            let perfilActualNombre = '';
+
+                                            // Función para filtrar perfiles en la tabla
+                                            function filtrarPerfiles() {
+                                                const input = document.getElementById('buscarPerfil');
+                                                const filter = input.value.toUpperCase();
+                                                const table = document.getElementById('tablaPerfiles');
+                                                const tr = table.getElementsByTagName('tr');
+
+                                                for (let i = 1; i < tr.length; i++) {
+                                                    const tdNombre = tr[i].getElementsByTagName('td')[1];
+                                                    if (tdNombre) {
+                                                        const txtValue = tdNombre.textContent || tdNombre.innerText;
+                                                        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                                                            tr[i].style.display = "";
+                                                        } else {
+                                                            tr[i].style.display = "none";
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            // Función para mostrar detalles del perfil
+                                            function verPerfil(id, nombre, estado) {
+                                                perfilActualId = id;
+                                                perfilActualNombre = nombre;
+
+                                                document.getElementById('viewId').textContent = id;
+                                                document.getElementById('viewNombre').textContent = nombre;
+
+                                                const estadoTexto = (estado == 1) ? 'Activo' : 'Inactivo';
+                                                const estadoClase = (estado == 1) ? 'status-active' : 'status-inactive';
+                                                const icono = (estado == 1) ? 'fa-check-circle' : 'fa-times-circle';
+
+                                                document.getElementById('viewEstado').innerHTML = `
                     <span class="badge-status ${estadoClase}">
                         <i class="fas ${icono} me-1"></i> ${estadoTexto}
                     </span>
                 `;
-                
-                document.getElementById('viewModalLabel').innerHTML = `
+
+                                                document.getElementById('viewModalLabel').innerHTML = `
                     <i class="fas fa-eye me-2"></i>Viendo Perfil: ${nombre}
                 `;
-                
-                const modal = new bootstrap.Modal(document.getElementById('viewModal'));
-                modal.show();
-            }
-            
-            // Función para preparar edición de perfil
-            function editarPerfil(id, nombre, estado) {
-                perfilActualId = id;
-                perfilActualNombre = nombre;
-                
-                document.getElementById('editId').value = id;
-                document.getElementById('editIdDisplay').textContent = id;
-                document.getElementById('editNombre').value = nombre;
-                
-                if (estado == 1) {
-                    document.getElementById('editActivo').checked = true;
-                } else {
-                    document.getElementById('editInactivo').checked = true;
-                }
-                
-                document.getElementById('editModalLabel').innerHTML = `
+
+                                                const modal = new bootstrap.Modal(document.getElementById('viewModal'));
+                                                modal.show();
+                                            }
+
+                                            // Función para preparar edición de perfil
+                                            function editarPerfil(id, nombre, estado) {
+                                                perfilActualId = id;
+                                                perfilActualNombre = nombre;
+
+                                                document.getElementById('editId').value = id;
+                                                document.getElementById('editIdDisplay').textContent = id;
+                                                document.getElementById('editNombre').value = nombre;
+
+                                                if (estado == 1) {
+                                                    document.getElementById('editActivo').checked = true;
+                                                } else {
+                                                    document.getElementById('editInactivo').checked = true;
+                                                }
+
+                                                document.getElementById('editModalLabel').innerHTML = `
                     <i class="fas fa-edit me-2"></i>Editando Perfil: ${nombre}
                 `;
-            }
-            
-            // Función para preparar eliminación de perfil
-            function eliminarPerfil(id, nombre) {
-                perfilActualId = id;
-                perfilActualNombre = nombre;
-                
-                document.getElementById('deleteId').value = id;
-                document.getElementById('deleteIdDisplay').textContent = `ID: ${id}`;
-                document.getElementById('deleteNombre').textContent = nombre;
-            }
-            
-            // Función para limpiar formulario de creación
-            function nuevoPerfil() {
-                document.getElementById('formCrear').reset();
-                document.getElementById('createActivo').checked = true;
-            }
-            
-            // Limpiar formulario de creación cuando se cierre el modal
-            document.getElementById('createModal').addEventListener('hidden.bs.modal', function () {
-                nuevoPerfil();
-            });
-            
-            /* ===============================
-             FUNCIONES EXISTENTES DEL DASHBOARD
-             ==================================*/
-            function actualizarFechaHora() {
-                const ahora = new Date();
+                                            }
 
-                // Formato de fecha
-                const opcionesFecha = {
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit"
-                };
+                                            // Función para preparar eliminación de perfil
+                                            function eliminarPerfil(id, nombre) {
+                                                perfilActualId = id;
+                                                perfilActualNombre = nombre;
 
-                // Formato de hora
-                const opcionesHora = {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    second: "2-digit"
-                };
+                                                document.getElementById('deleteId').value = id;
+                                                document.getElementById('deleteIdDisplay').textContent = `ID: ${id}`;
+                                                document.getElementById('deleteNombre').textContent = nombre;
+                                            }
 
-                const fecha = ahora.toLocaleDateString("es-ES", opcionesFecha);
-                const hora = ahora.toLocaleTimeString("es-ES", opcionesHora);
+                                            // Función para limpiar formulario de creación
+                                            function nuevoPerfil() {
+                                                document.getElementById('formCrear').reset();
+                                                document.getElementById('createActivo').checked = true;
+                                            }
 
-                document.getElementById("fechaHora").textContent = fecha + " " + hora;
-            }
+                                            // Limpiar formulario de creación cuando se cierre el modal
+                                            document.getElementById('createModal').addEventListener('hidden.bs.modal', function () {
+                                                nuevoPerfil();
+                                            });
 
-            // Actualiza cada segundo
-            setInterval(actualizarFechaHora, 1000);
+                                            /* ===============================
+                                             FUNCIONES EXISTENTES DEL DASHBOARD
+                                             ==================================*/
+                                            function actualizarFechaHora() {
+                                                const ahora = new Date();
 
-            // Ejecuta una vez al cargar
-            actualizarFechaHora();
+                                                // Formato de fecha
+                                                const opcionesFecha = {
+                                                    year: "numeric",
+                                                    month: "2-digit",
+                                                    day: "2-digit"
+                                                };
 
-            /* FUNCIÓN PARA CARGAR PÁGINAS EN EL IFRAME */
-            function loadPage(url) {
-                document.getElementById("contentFrame").src = url;
-                document.querySelector(".page-title h1").textContent = "Gestión de Perfiles";
-            }
+                                                // Formato de hora
+                                                const opcionesHora = {
+                                                    hour: "2-digit",
+                                                    minute: "2-digit",
+                                                    second: "2-digit"
+                                                };
 
-            /* ABRIR/CERRAR SIDEBAR */
-            document.getElementById('menuToggle').addEventListener('click', function () {
-                const sidebar = document.querySelector('.sidebar');
-                const topNav = document.querySelector('.top-nav');
-                const mainContent = document.querySelector('.main-content');
-                const footer = document.querySelector('.footer');
+                                                const fecha = ahora.toLocaleDateString("es-ES", opcionesFecha);
+                                                const hora = ahora.toLocaleTimeString("es-ES", opcionesHora);
 
-                sidebar.classList.toggle('active');
+                                                document.getElementById("fechaHora").textContent = fecha + " " + hora;
+                                            }
 
-                if (sidebar.classList.contains('active')) {
-                    topNav.style.left = '280px';
-                    mainContent.style.marginLeft = '280px';
-                    footer.style.marginLeft = '280px';
-                } else {
-                    topNav.style.left = '0';
-                    mainContent.style.marginLeft = '0';
-                    footer.style.marginLeft = '0';
-                }
-            });
+                                            // Actualiza cada segundo
+                                            setInterval(actualizarFechaHora, 1000);
 
-            /* MENÚ DE USUARIO */
-            const userMenuTrigger = document.getElementById('userMenuTrigger');
-            const userMenuDropdown = document.getElementById('userMenuDropdown');
+                                            // Ejecuta una vez al cargar
+                                            actualizarFechaHora();
 
-            userMenuTrigger.addEventListener('click', function (e) {
-                e.stopPropagation();
-                const open = userMenuDropdown.style.opacity === '1';
-                userMenuDropdown.style.opacity = open ? '0' : '1';
-                userMenuDropdown.style.visibility = open ? 'hidden' : 'visible';
-                userMenuDropdown.style.transform = open ? 'translateY(-10px)' : 'translateY(0)';
-            });
+                                            /* FUNCIÓN PARA CARGAR PÁGINAS EN EL IFRAME */
+                                            function loadPage(url) {
+                                                document.getElementById("contentFrame").src = url;
+                                                document.querySelector(".page-title h1").textContent = "Gestión de Perfiles";
+                                            }
 
-            document.addEventListener('click', () => {
-                userMenuDropdown.style.opacity = '0';
-                userMenuDropdown.style.visibility = 'hidden';
-                userMenuDropdown.style.transform = 'translateY(-10px)';
-            });
+                                            /* ABRIR/CERRAR SIDEBAR */
+                                            document.getElementById('menuToggle').addEventListener('click', function () {
+                                                const sidebar = document.querySelector('.sidebar');
+                                                const topNav = document.querySelector('.top-nav');
+                                                const mainContent = document.querySelector('.main-content');
+                                                const footer = document.querySelector('.footer');
+
+                                                sidebar.classList.toggle('active');
+
+                                                if (sidebar.classList.contains('active')) {
+                                                    topNav.style.left = '280px';
+                                                    mainContent.style.marginLeft = '280px';
+                                                    footer.style.marginLeft = '280px';
+                                                } else {
+                                                    topNav.style.left = '0';
+                                                    mainContent.style.marginLeft = '0';
+                                                    footer.style.marginLeft = '0';
+                                                }
+                                            });
+
+                                            /* MENÚ DE USUARIO */
+                                            const userMenuTrigger = document.getElementById('userMenuTrigger');
+                                            const userMenuDropdown = document.getElementById('userMenuDropdown');
+
+                                            userMenuTrigger.addEventListener('click', function (e) {
+                                                e.stopPropagation();
+                                                const open = userMenuDropdown.style.opacity === '1';
+                                                userMenuDropdown.style.opacity = open ? '0' : '1';
+                                                userMenuDropdown.style.visibility = open ? 'hidden' : 'visible';
+                                                userMenuDropdown.style.transform = open ? 'translateY(-10px)' : 'translateY(0)';
+                                            });
+
+                                            document.addEventListener('click', () => {
+                                                userMenuDropdown.style.opacity = '0';
+                                                userMenuDropdown.style.visibility = 'hidden';
+                                                userMenuDropdown.style.transform = 'translateY(-10px)';
+                                            });
         </script>
     </body>
 </html>

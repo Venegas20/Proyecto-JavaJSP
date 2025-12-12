@@ -8,12 +8,16 @@
 
 
 <%    EUsuario user = (EUsuario) session.getAttribute("usuario");
-
+    
     if (user == null) {
         response.sendRedirect("../LOGIN/login.html");
         return;
     }
-
+    
+    if (user != null && user.getPid() != 1) {
+        response.sendRedirect("error403.jsp");
+    }
+    
 
 %>
 
@@ -26,7 +30,7 @@
     String idEdit = request.getParameter("edit");
     String nombreEdit = "";
     String ubicacionEdit = "";
-
+    
     if (idEdit != null) {
         PreparedStatement ps2 = cn.prepareStatement("SELECT * FROM entidades WHERE idEntidades=?");
         ps2.setInt(1, Integer.parseInt(idEdit));
@@ -84,7 +88,7 @@
 
                 <!-- TABLA -->
                 <div class=" ">
-                    
+
 
                     <div class="">
 
@@ -194,34 +198,34 @@
         <script>
             function actualizarFechaHora() {
                 const ahora = new Date();
-
+                
                 // Formato de fecha
                 const opcionesFecha = {
                     year: "numeric",
                     month: "2-digit",
                     day: "2-digit"
                 };
-
+                
                 // Formato de hora
                 const opcionesHora = {
                     hour: "2-digit",
                     minute: "2-digit",
                     second: "2-digit"
                 };
-
+                
                 const fecha = ahora.toLocaleDateString("es-ES", opcionesFecha);
                 const hora = ahora.toLocaleTimeString("es-ES", opcionesHora);
-
+                
                 document.getElementById("fechaHora").textContent = fecha + " " + hora;
             }
-
+            
             // Actualiza cada segundo
             setInterval(actualizarFechaHora, 1000);
-
+            
             // Ejecuta una vez al cargar
             actualizarFechaHora();
-
-
+            
+            
             /* ===============================
              FUNCIÓN PARA CARGAR PÁGINAS EN EL IFRAME
              ==================================*/
@@ -229,16 +233,16 @@
                 document.getElementById("contentFrame").src = url;
                 document.querySelector(".page-title h1").textContent = "Gestión de Usuarios";
             }
-
+            
             /* ABRIR/CERRAR SIDEBAR */
             document.getElementById('menuToggle').addEventListener('click', function () {
                 const sidebar = document.querySelector('.sidebar');
                 const topNav = document.querySelector('.top-nav');
                 const mainContent = document.querySelector('.main-content');
                 const footer = document.querySelector('.footer');
-
+                
                 sidebar.classList.toggle('active');
-
+                
                 if (sidebar.classList.contains('active')) {
                     topNav.style.left = '280px';
                     mainContent.style.marginLeft = '280px';
@@ -249,11 +253,11 @@
                     footer.style.marginLeft = '0';
                 }
             });
-
+            
             /* MENÚ DE USUARIO */
             const userMenuTrigger = document.getElementById('userMenuTrigger');
             const userMenuDropdown = document.getElementById('userMenuDropdown');
-
+            
             userMenuTrigger.addEventListener('click', function (e) {
                 e.stopPropagation();
                 const open = userMenuDropdown.style.opacity === '1';
@@ -261,13 +265,13 @@
                 userMenuDropdown.style.visibility = open ? 'hidden' : 'visible';
                 userMenuDropdown.style.transform = open ? 'translateY(-10px)' : 'translateY(0)';
             });
-
+            
             document.addEventListener('click', () => {
                 userMenuDropdown.style.opacity = '0';
                 userMenuDropdown.style.visibility = 'hidden';
                 userMenuDropdown.style.transform = 'translateY(-10px)';
             });
-
+            
         </script>
 
     </body>

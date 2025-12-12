@@ -8,8 +8,7 @@
 <%@ include file="../DBCONEXION/conexionDB.jsp"%>
 
 <%-- CÓDIGO PARA PROCESAR CRUD --%>
-<%
-    // Procesar las operaciones CRUD
+<%    // Procesar las operaciones CRUD
     if (request.getMethod().equals("POST")) {
         String accion = request.getParameter("accion");
         Connection conCrud = null;
@@ -112,58 +111,62 @@
     List<EUsuario> lista = new ArrayList();
     if (user == null) {
         response.sendRedirect("../LOGIN/login.html");
+        return;
+    }
+    if (user != null && user.getPid() != 1) {
+        response.sendRedirect("error403.jsp");
+        return;
+    }
+
+    Connection con = cn;
+    PreparedStatement ps = null;
+    ResultSet rs = null;
+    if (con == null) {
+        response.sendRedirect("../LOGIN/errorDb.jsp");
     } else {
+        try {
+            ps = con.prepareStatement(
+                    "SELECT u.*,p.Nombre_Perfil, p.Estado_Perfil FROM Usuarios u LEFT JOIN perfil p ON u.Perfil_idPerfil = p.idPerfil ORDER BY u.idUsuarios"
+            );
+            rs = ps.executeQuery();
 
-        Connection con = cn;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        if (con == null) {
-            response.sendRedirect("../LOGIN/errorDb.jsp");
-        } else {
+            while (rs.next()) {
+
+                EUsuario usuario = new EUsuario();
+
+                usuario.setId(rs.getInt("idUsuarios"));
+                usuario.setUsuario(rs.getString("Usuario"));
+                usuario.setClave(rs.getString("Clave"));
+                usuario.setNusuario(rs.getString("Nombre_Usuario"));
+                usuario.setEmail(rs.getString("Email"));
+                usuario.setPid(rs.getInt("Perfil_idPerfil"));
+                usuario.setNombre_perfil(rs.getString("Nombre_Perfil"));
+
+                lista.add(usuario);
+            }
+
+        } catch (Exception e) {
+        } finally {
             try {
-                ps = con.prepareStatement(
-                        "SELECT * FROM Usuarios"
-                );
-                rs = ps.executeQuery();
-
-                while (rs.next()) {
-
-                    EUsuario usuario = new EUsuario();
-
-                    usuario.setId(rs.getInt("idUsuarios"));
-                    usuario.setUsuario(rs.getString("Usuario"));
-                    usuario.setClave(rs.getString("Clave"));
-                    usuario.setNusuario(rs.getString("Nombre_Usuario"));
-                    usuario.setEmail(rs.getString("Email"));
-                    usuario.setPid(rs.getInt("Perfil_idPerfil"));
-
-                    lista.add(usuario);
+                if (rs != null) {
+                    rs.close();
                 }
+            } catch (Exception ex) {
+            }
+            try {
+                if (ps != null) {
+                    ps.close();
+                }
+            } catch (Exception ex) {
+            }
+            try {
 
-            } catch (Exception e) {
-            } finally {
-                try {
-                    if (rs != null) {
-                        rs.close();
-                    }
-                } catch (Exception ex) {
-                }
-                try {
-                    if (ps != null) {
-                        ps.close();
-                    }
-                } catch (Exception ex) {
-                }
-                try {
-                    if (con != null) {
-                        con.close();
-                    }
-                } catch (Exception ex) {
-                }
+            } catch (Exception ex) {
             }
         }
-
     }
+
+
 %>
 
 <!DOCTYPE html>
@@ -282,24 +285,19 @@
                                 <tbody>
                                     <%
                                         for (EUsuario u : lista) {
-                                            String perfilNombre = "";
                                             String badgeColor = "";
 
                                             switch (u.getPid()) {
                                                 case 1:
-                                                    perfilNombre = "Administrador";
                                                     badgeColor = "bg-primary text-primary bg-opacity-10";
                                                     break;
                                                 case 2:
-                                                    perfilNombre = "Soporte Técnico";
                                                     badgeColor = "bg-warning text-warning bg-opacity-10";
                                                     break;
                                                 case 3:
-                                                    perfilNombre = "Usuario";
                                                     badgeColor = "bg-success text-success bg-opacity-10";
                                                     break;
                                                 default:
-                                                    perfilNombre = "No definido";
                                                     badgeColor = "bg-secondary text-secondary bg-opacity-10";
                                             }
                                     %>
@@ -311,7 +309,7 @@
                                         <td><%= u.getEmail()%></td>
                                         <td>
                                             <span class="badge-perfil <%= badgeColor%>">
-                                                <%= perfilNombre%>
+                                                <%= u.getNombre_perfil()%>
                                             </span>
                                         </td>
 
@@ -329,7 +327,7 @@
 
                                     <%
                                         } // fin del for
-%>
+                                    %>
                                 </tbody>
 
                             </table>
@@ -381,9 +379,67 @@
                                         <label class="form-label fw-bold">Perfil *</label>
                                         <select class="form-select" id="perfil_id" name="perfil_id" required>
                                             <option value="">Seleccionar...</option>
-                                            <option value="1">Administrador</option>
-                                            <option value="2">Soporte Técnico</option>
-                                            <option value="3">Usuario</option>
+                                            <%
+                                                // Cargar perfiles directamente aquí
+                                                Connection conSelect = null;
+                                                PreparedStatement psSelect = null;
+                                                ResultSet rsSelect = null;
+                                                boolean hayPerfiles = false;
+
+                                                try {
+                                                    conSelect = cn;
+                                                    String sql = "SELECT idPerfil, Nombre_Perfil FROM perfil WHERE Estado_Perfil = 1 ORDER BY Nombre_Perfil";
+                                                    psSelect = conSelect.prepareStatement(sql);
+                                                    rsSelect = psSelect.executeQuery();
+
+                                                    // Verificar si hay resultados
+                                                    if (rsSelect.next()) {
+                                                        hayPerfiles = true;
+                                                        // Volver al primer registro
+                                                        rsSelect.beforeFirst();
+
+                                                        // Procesar todos los registros
+                                                        while (rsSelect.next()) {
+                                                            int idPerfil = rsSelect.getInt("idPerfil");
+                                                            String nombrePerfil = rsSelect.getString("Nombre_Perfil");
+                                            %>
+                                            <option value="<%= idPerfil%>"><%= nombrePerfil%></option>
+                                            <%
+                                                }
+                                            } else {
+                                                // No hay perfiles activos
+                                            %>
+                                            <option value="" disabled>No hay perfiles activos</option>
+                                            <%
+                                                }
+                                            } catch (Exception e) {
+                                                // Error en la consulta
+%>
+                                            <option value="" disabled><%= e.getMessage()%> </option>
+                                            <%
+                                                } finally {
+                                                    // Cerrar recursos
+                                                    try {
+                                                        if (rsSelect != null) {
+                                                            rsSelect.close();
+                                                        }
+                                                        if (psSelect != null) {
+                                                            psSelect.close();
+                                                        }
+                                                        if (conSelect != null) {
+                                                            conSelect.close();
+                                                        }
+                                                    } catch (Exception ex) {
+                                                    }
+                                                }
+
+                                                // Si no hay perfiles después del procesamiento
+                                                if (!hayPerfiles) {
+                                            %>
+                                            <option value="" disabled>No hay perfiles disponibles</option>
+                                            <%
+                                                }
+                                            %>
                                         </select>
                                     </div>
                                 </div>
@@ -391,7 +447,7 @@
 
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                <button type="submit" class="btn btn-primary">Guardar Usuario</button>
+                                <button type="submit" class="btn btn-primary" id="btnGuardarUsuario">Guardar Usuario</button>
                             </div>
                         </form>
 

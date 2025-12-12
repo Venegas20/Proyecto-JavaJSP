@@ -9,7 +9,7 @@
     EUsuario user = (EUsuario) session.getAttribute("usuario");
 
     if (user == null) {
-        response.sendRedirect("../LOGIN/login.html");
+        response.sendRedirect("../../LOGIN/login.html");
         return;
     }
 
