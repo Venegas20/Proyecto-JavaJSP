@@ -41,16 +41,18 @@ CREATE TABLE `entidades` (
 
 CREATE TABLE `perfil` (
   `idPerfil` int(11) NOT NULL,
-  `Nombre_Perfil` varchar(50) NOT NULL
+  `Nombre_Perfil` varchar(50) NOT NULL,
+  `Estado_Perfil` int(11) NOT NULL,
+
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `perfil`
 --
 
-INSERT INTO `perfil` (`idPerfil`, `Nombre_Perfil`) VALUES
-(1, 'Administrador'),
-(2, 'Soporte Tecnico');
+INSERT INTO `perfil` (`idPerfil`, `Nombre_Perfil`,`Estado_Perfil`) VALUES
+(1, 'Administrador',1),
+(2, 'Soporte Tecnico',1);
 
 -- --------------------------------------------------------
 
