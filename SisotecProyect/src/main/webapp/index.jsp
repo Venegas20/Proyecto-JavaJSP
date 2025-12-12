@@ -7,7 +7,8 @@
 
 <%    Connection con = cn;
     if (con == null) {
-        response.sendRedirect("LOGIN/errorDb.jsp");
+        response.sendRedirect("LOGIN/errorDB.jsp");
+        return;
     }
 
     var user = session.getAttribute("usuario");
