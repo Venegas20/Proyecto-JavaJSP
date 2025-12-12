@@ -27,102 +27,9 @@
     </head>
 
     <body>
+        <%@ include file="includes/navbar.jsp"%>
 
-        <!-- Barra lateral -->
-        <nav class="sidebar">
-            <div class="sidebar-header">
-                <h2><i class="fas fa-tachometer-alt"></i> SISOTEC</h2>
-                <p>Sistema de soporte técnico</p>
-            </div>
-
-            <div class="sidebar-menu">
-
-                <h3>Panel de Tablas</h3>
-                <ul>
-                    <%          if (user != null && user.getPid() == 1) {
-                    %>
-
-                    <li class="active">
-                        <a href="usuarios.jsp">
-                            <i class="fas fa-user"></i> Gestión de usuarios
-                        </a>
-                    </li>
-                    <li><a href="#"><i class="fas fa-desktop"></i> Gestión de Entidad</a></li>
-                    <li><a href="#"><i class="fas fa-chart-line"></i> Gestión de Perfil</a></li>
-                        <%}%>
-                    <li><a href="#"><i class="fas fa-ticket"></i> Gestión de Tickets</a></li>
-                </ul>
-
-                <h3>MANTENIMIENTO</h3>
-                <%
-                    if (user != null && user.getPid() == 1) {
-
-                %>
-                <ul>
-                    <li><a href="#"><i class="fas fa-window-restore"></i> Formularios</a></li>
-                    <li><a href="#"><i class="fas fa-table"></i> Tablas</a></li>
-                    <li><a href="#"><i class="fas fa-id-card"></i> Empleados</a></li>
-                    <li><a href="#"><i class="fas fa-user-check"></i> Autorización</a></li>
-                </ul>
-
-                <h3>CONFIGURACIÓN</h3>
-                <ul>
-                    <li><a href="#"><i class="fas fa-cog"></i> Ajustes del sistema</a></li>
-                    <li><a href="#"><i class="fas fa-users"></i> Usuarios</a></li>
-                    <li><a href="#"><i class="fas fa-shield-alt"></i> Seguridad</a></li>
-                </ul>
-                <%}%>
-            </div>
-        </nav>
-
-        <!-- NAV SUPERIOR -->
-        <header class="top-nav">
-            <div class="top-nav-content">
-
-                <div class="top-nav-left">
-                    <button class="menu-toggle" id="menuToggle">
-                        <i class="fas fa-bars"></i>
-                    </button>
-
-                    <div class="page-title">
-                        <h1><b>SISOTEC</b></h1>
-                    </div>
-                </div>
-
-                <div class="top-navigation">
-                    <ul class="nav-menu">
-                        <li><a class="active" href="#">Reportes</a></li>
-                        <li><a href="#">Mantenimiento</a></li>
-                        <li><a href="#">Configuración</a></li>
-                        <li><a href="#">Ayuda</a></li>
-                    </ul>
-
-                    <!-- Menú de usuario -->
-                    <div class="user-menu-container">
-                        <div class="user-menu-trigger" id="userMenuTrigger">
-                            <div class="user-avatar" ><i class="fa-solid fa-users"></i></div>
-                            <div class="user-info">
-
-                                <div class="user-name">
-                                    <% if (user != null) {%>
-                                    <%= user.getUsuario()%>
-                                    <% }%></div>
-                                <div class="user-role" id="fechaHora"></div>
-                            </div>
-                            <i class="fas fa-chevron-down ms-2"></i>
-                        </div>
-
-                        <div class="user-menu-dropdown" id="userMenuDropdown">
-                            <ul>
-                                <li><a href="#" id="changeUserBtn"><i class="fas fa-exchange-alt"></i> Cambiar usuario</a></li>
-                                <li><a href="../LOGIN/logout.jsp" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</a></li>
-                            </ul>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-        </header>
+        <%@ include file="includes/header.jsp"%>
 
         <!-- CONTENIDO PRINCIPAL -->
         <main class="main-content">
@@ -134,11 +41,7 @@
         </main>
 
         <!-- FOOTER -->
-        <footer class="footer">
-            <div class="footer-content">
-                <p>&copy; 2025 SISOTEC LTE V-0.0.01 - Sistema de Soporte Técnico. Todos los derechos reservados.</p>
-            </div>
-        </footer>
+        <%@ include file="includes/footer.jsp"%>
 
         <!-- Bootstrap JS -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>

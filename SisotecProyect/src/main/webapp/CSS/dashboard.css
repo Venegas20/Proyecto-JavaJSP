@@ -302,7 +302,7 @@
       min-height: calc(100vh - var(--top-nav-height) - 70px);
       transition: margin-left 0.3s;
       display: flex;
-      align-items: center;
+      /*align-items: center;*/
       justify-content: center;
     }
 
