@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>SISOTEC - Reporte General</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- FontAwesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+
+    <style>
+        body { background:#f8f9fa; font-size:14px; }
+        h3 { font-weight:bold; }
+        .table td,.table th{vertical-align:middle;}
+        .badge{font-size:.85rem;}
+        @media print{
+            .no-print{display:none!important;}
+            body{font-size:12px;}
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container-fluid mt-4">
+
+    <!-- ENCABEZADO -->
+    <div class="row mb-3">
+        <div class="col-md-8">
+            <h3><i class="fa-solid fa-ticket"></i> Reporte General de Tickets</h3>
+            <small class="text-muted">Sistema de Soporte Técnico - SISOTEC</small>
+        </div>
+        <div class="col-md-4 text-end">
+            <p><strong>Fecha:</strong> 13/12/2025</p>
+            <p><strong>Entidad:</strong> DIRIS LIMA SUR</p>
+        </div>
+    </div>
+
+    <!-- EXPORTAR -->
+    <div class="row mb-3 no-print">
+        <div class="col text-end">
+            <button class="btn btn-danger btn-sm">
+                <i class="fa-solid fa-file-pdf"></i> PDF
+            </button>
+            <button class="btn btn-success btn-sm">
+                <i class="fa-solid fa-file-excel"></i> Excel
+            </button>
+        </div>
+    </div>
+
+    <!-- FILTROS -->
+    <div class="card mb-3 no-print">
+        <div class="card-header bg-primary text-white">
+            <i class="fa-solid fa-filter"></i> Filtros
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label>Estado</label>
+                    <select class="form-select">
+                        <option>Todos</option>
+                        <option>Nuevos</option>
+                        <option>En Proceso</option>
+                        <option>Resuelto</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label>Entidad</label>
+                    <select class="form-select">
+                        <option>Todas</option>
+                        <option>DIRIS LIMA SUR</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label>Usuario</label>
+                    <select class="form-select">
+                        <option>Todos</option>
+                        <option>evenegas</option>
+                        <option>juanp</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label>Fecha</label>
+                    <input type="date" class="form-control">
+                </div>
+                <div class="col-12 text-end">
+                    <button class="btn btn-secondary btn-sm">
+                        <i class="fa-solid fa-broom"></i> Limpiar
+                    </button>
+                    <button class="btn btn-primary btn-sm">
+                        <i class="fa-solid fa-search"></i> Buscar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABLA -->
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover bg-white">
+            <thead class="table-dark text-center">
+                <tr>
+                    <th>#</th>
+                    <th>Título</th>
+                    <th>Estado</th>
+                    <th>Fecha</th>
+                    <th>Solicitante</th>
+                    <th>Entidad</th>
+                    <th>Usuario</th>
+                    <th>Perfil</th>
+                    <th class="no-print">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="text-center">1</td>
+                    <td>Problema de red</td>
+                    <td class="text-center"><span class="badge bg-warning">Nuevo</span></td>
+                    <td>2025-12-13</td>
+                    <td>Juan Pérez</td>
+                    <td>DIRIS LIMA SUR</td>
+                    <td>juanp</td>
+                    <td>Soporte Técnico</td>
+                    <td class="text-center no-print">
+                        <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#verModal">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                        <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#editarModal">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button class="btn btn-danger btn-sm">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- MODAL VER -->
+    <div class="modal fade no-print" id="verModal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5><i class="fa-solid fa-eye"></i> Ver Ticket</h5>
+                    <button class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Título:</strong> Problema de red</p>
+                    <p><strong>Estado:</strong> Nuevo</p>
+                    <p><strong>Solicitante:</strong> Juan Pérez</p>
+                    <p><strong>Ubicación:</strong> Sede Central</p>
+                    <p><strong>Entidad:</strong> DIRIS LIMA SUR</p>
+                    <p><strong>Usuario:</strong> juanp</p>
+                    <p><strong>Solución:</strong> Pendiente</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL EDITAR -->
+    <div class="modal fade no-print" id="editarModal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5><i class="fa-solid fa-pen"></i> Editar Ticket</h5>
+                    <button class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label>Título</label>
+                                <input class="form-control" value="Problema de red">
+                            </div>
+                            <div class="col-md-6">
+                                <label>Estado</label>
+                                <select class="form-select">
+                                    <option>Nuevos</option>
+                                    <option>En Proceso</option>
+                                    <option>Resuelto</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label>Solicitante</label>
+                                <input class="form-control" value="Juan Pérez">
+                            </div>
+                            <div class="col-md-6">
+                                <label>Ubicación</label>
+                                <input class="form-control" value="Sede Central">
+                            </div>
+                            <div class="col-md-6">
+                                <label>Usuario</label>
+                                <select class="form-select">
+                                    <option>juanp</option>
+                                    <option>evenegas</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label>Entidad</label>
+                                <select class="form-select">
+                                    <option>DIRIS LIMA SUR</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label>Solución</label>
+                                <textarea class="form-control">Pendiente</textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-success">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
