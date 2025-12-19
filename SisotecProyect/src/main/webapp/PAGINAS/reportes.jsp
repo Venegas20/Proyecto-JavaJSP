@@ -421,7 +421,7 @@
                                     // =========================
                                     // LOGO
                                     // =========================
-                                    const logo = await cargarImagen("..//assets/img/logo.png");
+                                    const logo = await cargarImagen("../assets/img/logo.png");
 
                                     doc.addImage(logo, "PNG", 40, 30, 80, 80);
 
