@@ -50,10 +50,10 @@
         <% if (user1
                     != null && user1.getPid()
                     == 1) {%>
-        <h3>MANTENIMIENTO</h3>
+        <h3>REPORTES</h3>
         <ul>
-            <li class="<%=  ""%>">
-                <a href="#"><i class="fas fa-window-restore"></i> Formularios</a>
+            <li class="<%= nombreArchivo.equals("reportes.jsp") ? "active" : ""%>">
+                <a href="reportes.jsp"><i class="fas fa-window-restore"></i> Reportes</a>
             </li>
             <li class="<%=  ""%>">
                 <a href="#"><i class="fas fa-table"></i> Tablas</a>
