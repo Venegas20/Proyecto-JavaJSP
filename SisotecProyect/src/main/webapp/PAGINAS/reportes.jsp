@@ -405,22 +405,95 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
 
         <script>
-                                    function exportarPdfJS() {
-                                        const {jsPDF} = window.jspdf;
-                                        const doc = new jsPDF("l", "pt");
+                                async function exportarPdfJS() {
 
-                                        doc.text("Reporte General de Tickets", 40, 30);
+                                    const {jsPDF} = window.jspdf;
+                                    const doc = new jsPDF("l", "pt", "a4");
 
-                                        const tabla = document.getElementById("tablaTickets");
-                                        doc.autoTable({
-                                            html: tabla,
-                                            startY: 50,
-                                            theme: "grid"
-                                        });
+                                    // =========================
+                                    // DATOS GENERALES
+                                    // =========================
+                                    const empresa = "DIRIS LIMA SUR";
+                                    const sistema = "Sistema de Soporte Técnico - SISOTEC";
+                                    const titulo = "REPORTE GENERAL DE TICKETS";
+                                    const fecha = new Date().toLocaleDateString("es-PE");
 
-                                        doc.save("reporte_tickets.pdf");
+                                    // =========================
+                                    // LOGO
+                                    // =========================
+                                    const logo = await cargarImagen("..//assets/img/logo.png");
+
+                                    doc.addImage(logo, "PNG", 40, 30, 80, 80);
+
+                                    // =========================
+                                    // ENCABEZADO TEXTO
+                                    // =========================
+                                    doc.setFont("helvetica", "bold");
+                                    doc.setFontSize(16);
+                                    doc.text(empresa, 140, 55);
+
+                                    doc.setFontSize(11);
+                                    doc.setFont("helvetica", "normal");
+                                    doc.text(sistema, 140, 75);
+                                    doc.text(`Fecha de exportación: ${fecha}`, 140, 95);
+
+                                    // =========================
+                                    // TÍTULO
+                                    // =========================
+                                    doc.setFontSize(14);
+                                    doc.setFont("helvetica", "bold");
+                                    doc.text(titulo, 40, 140);
+
+                                    // =========================
+                                    // TABLA
+                                    // =========================
+                                    doc.autoTable({
+                                        html: "#tablaTickets",
+                                        startY: 160,
+                                        theme: "grid",
+                                        headStyles: {
+                                            fillColor: [33, 37, 41],
+                                            textColor: 255
+                                        },
+                                        styles: {
+                                            fontSize: 9
+                                        }
+                                    });
+
+                                    // =========================
+                                    // FOOTER (opcional)
+                                    // =========================
+                                    const pageCount = doc.internal.getNumberOfPages();
+                                    for (let i = 1; i <= pageCount; i++) {
+                                        doc.setPage(i);
+                                        doc.setFontSize(8);
+                                        doc.text(
+                                                `Página ${i} de ${pageCount}`,
+                                                doc.internal.pageSize.getWidth() - 80,
+                                                doc.internal.pageSize.getHeight() - 20
+                                                );
                                     }
+
+                                    // =========================
+                                    // DESCARGA
+                                    // =========================
+                                    doc.save("reporte_tickets.pdf");
+                                }
+
+
+    // =========================
+    // FUNCIÓN PARA CARGAR IMAGEN
+    // =========================
+                                function cargarImagen(url) {
+                                    return new Promise((resolve) => {
+                                        const img = new Image();
+                                        img.crossOrigin = "Anonymous";
+                                        img.onload = () => resolve(img);
+                                        img.src = url;
+                                    });
+                                }
         </script>
+
 
     </body>
 </html>
