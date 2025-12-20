@@ -5,8 +5,7 @@
 <!-- 🔗 IMPORTAMOS LA CONEXIÓN EXTERNA -->
 <%@ include file="../DBCONEXION/conexionDB.jsp"%>
 
-<%
-    EUsuario user = (EUsuario) session.getAttribute("usuario");
+<%    EUsuario user = (EUsuario) session.getAttribute("usuario");
     if (user == null) {
         response.sendRedirect("../LOGIN/login.html");
         return;
@@ -46,7 +45,16 @@
     try {
         // 1. Estadísticas generales de tickets
         String queryStats = "SELECT Estado, COUNT(*) as cantidad FROM tickets GROUP BY Estado";
+
+        if (!isAdmin) {
+            queryStats = "SELECT Estado, COUNT(*) as cantidad FROM tickets WHERE Usuarios_idUsuarios = ? GROUP BY Estado ";
+        }
+
         PreparedStatement psStats = cn.prepareStatement(queryStats);
+
+        if (!isAdmin) {
+            psStats.setInt(1, user.getId());
+        }
         ResultSet rsStats = psStats.executeQuery();
 
         while (rsStats.next()) {
@@ -97,7 +105,7 @@
 
         // 4. Tickets asignados al usuario actual (si no es admin)
         if (!isAdmin) {
-            String queryAsignados = "SELECT COUNT(*) as total FROM tickets WHERE Usuarios_idUsuarios = ? AND Estado IN ('En Proceso', 'Pendiente')";
+            String queryAsignados = "SELECT COUNT(*) as total FROM tickets WHERE Usuarios_idUsuarios = ? AND Estado IN ('En Proceso', 'Pendiente','Nuevos')";
             PreparedStatement psAsignados = cn.prepareStatement(queryAsignados);
             psAsignados.setInt(1, user.getId());
             ResultSet rsAsignados = psAsignados.executeQuery();
@@ -267,7 +275,7 @@
                             <div class="card-body">
                                 <div class="row align-items-center">
                                     <div class="col-md-8">
-                                        <h2 class="h4 fw-bold mb-1">¡Bienvenido, <%= user.getNusuario()!= null ? user.getNusuario(): "Usuario"%>!</h2>
+                                        <h2 class="h4 fw-bold mb-1">¡Bienvenido, <%= user.getNusuario() != null ? user.getNusuario() : "Usuario"%>!</h2>
                                         <p class="text-muted mb-0">
                                             <%= isAdmin ? "Panel de administración del sistema de tickets" : "Panel de usuario - Gestión de tickets asignados"%>
                                         </p>
@@ -291,7 +299,7 @@
                             <i class="bi bi-speedometer2 me-2"></i>Estadísticas del Sistema
                         </h3>
                     </div>
-
+                    <% if (isAdmin) {%>
                     <!-- Ticket Nuevos -->
                     <div class="col-md-6 col-lg-3 mb-4">
                         <div class="card stat-card shadow-sm card-new">
@@ -300,7 +308,7 @@
                                     <div class="col-8">
                                         <div class="stat-number"><%= ticketsNuevos%></div>
                                         <div class="stat-title">Nuevos</div>
-                                        <small>Sin asignar</small>
+                                        <small>Recien registrados</small>
                                     </div>
                                     <div class="col-4 text-end">
                                         <i class="stat-icon bi bi-plus-circle"></i>
@@ -310,6 +318,26 @@
                         </div>
                     </div>
 
+                    <% } else {%>
+                    <!-- Para USUARIOS NORMALES -->
+                    <!-- Tickets asignados -->
+                    <div class="col-md-6 col-lg-3 mb-4">
+                        <div class="card stat-card shadow-sm" style="background: linear-gradient(45deg, #6610f2, #520dc2); color: white;">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-8">
+                                        <div class="stat-number"><%= ticketsAsignadosUsuario%></div>
+                                        <div class="stat-title">Asignados</div>
+                                        <small>Tickets pendientes</small>
+                                    </div>
+                                    <div class="col-4 text-end">
+                                        <i class="stat-icon bi bi-person-check"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <% }%>
                     <!-- En Proceso -->
                     <div class="col-md-6 col-lg-3 mb-4">
                         <div class="card stat-card shadow-sm card-process">
@@ -439,26 +467,8 @@
                             </div>
                         </div>
                     </div>
-                    <% } else {%>
-                    <!-- Para USUARIOS NORMALES -->
-                    <!-- Tickets asignados -->
-                    <div class="col-md-6 col-lg-3 mb-4">
-                        <div class="card stat-card shadow-sm" style="background: linear-gradient(45deg, #6610f2, #520dc2); color: white;">
-                            <div class="card-body">
-                                <div class="row align-items-center">
-                                    <div class="col-8">
-                                        <div class="stat-number"><%= ticketsAsignadosUsuario%></div>
-                                        <div class="stat-title">Asignados</div>
-                                        <small>Tickets pendientes</small>
-                                    </div>
-                                    <div class="col-4 text-end">
-                                        <i class="stat-icon bi bi-person-check"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                     <% } %>
+
                 </div>
 
                 <!-- GRÁFICOS Y TABLAS -->
